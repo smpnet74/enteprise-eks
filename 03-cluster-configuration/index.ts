@@ -37,13 +37,13 @@ const cluster = new eks.Cluster(`${projectName}`, {
     publicSubnetIds: config.publicSubnetIds,
     privateSubnetIds: config.privateSubnetIds,
     storageClasses: {
-        "gp2-encrypted": { type: "gp2", encrypted: true},
-        "sc1": { type: "sc1"}
+        "gp2-encrypted": { type: "gp2", encrypted: true },
+        "sc1": { type: "sc1" }
     },
     nodeAssociatePublicIpAddress: false,
     skipDefaultNodeGroup: true,
     deployDashboard: false,
-    version: "1.14",
+    version: "1.16",
     tags: {
         "Project": "k8s-aws-cluster",
         "Org": "pulumi",
@@ -64,46 +64,46 @@ export const securityGroupIds = [cluster.nodeSecurityGroup.id];
 // Create a Standard node group of t2.medium workers.
 const ngStandard = new eks.NodeGroup(`${projectName}-ng-standard`, {
     cluster: cluster,
-    instanceProfile: new aws.iam.InstanceProfile("ng-standard", {role: stdNodegroupIamRoleName}),
+    instanceProfile: new aws.iam.InstanceProfile("ng-standard", { role: stdNodegroupIamRoleName }),
     nodeAssociatePublicIpAddress: false,
     nodeSecurityGroup: cluster.nodeSecurityGroup,
     clusterIngressRule: cluster.eksClusterIngressRule,
-    amiId: "ami-0ca5998dc2c88e64b", // k8s v1.14.7 in us-west-2
+    //amiId: "ami-0ca5998dc2c88e64b", // k8s v1.14.7 in us-west-2
     instanceType: "t2.medium",
     desiredCapacity: 3,
     minSize: 3,
     maxSize: 10,
-    labels: {"amiId": "ami-0ca5998dc2c88e64b"},
+    labels: { "amiId": "ami-0ca5998dc2c88e64b" },
     cloudFormationTags: clusterName.apply(clusterName => ({
         "CloudFormationGroupTag": "true",
         "k8s.io/cluster-autoscaler/enabled": "true",
         [`k8s.io/cluster-autoscaler/${clusterName}`]: "true",
     })),
 }, {
-    providers: { kubernetes: cluster.provider},
+    providers: { kubernetes: cluster.provider },
 });
 
 // Create a 2xlarge node group of t3.2xlarge workers with taints for special workloads.
 const ng2xlarge = new eks.NodeGroup(`${projectName}-ng-2xlarge`, {
     cluster: cluster,
-    instanceProfile: new aws.iam.InstanceProfile("ng-2xlarge", {role: perfNodegroupIamRoleName}),
+    instanceProfile: new aws.iam.InstanceProfile("ng-2xlarge", { role: perfNodegroupIamRoleName }),
     nodeAssociatePublicIpAddress: false,
     nodeSecurityGroup: cluster.nodeSecurityGroup,
     clusterIngressRule: cluster.eksClusterIngressRule,
-    amiId: "ami-0ca5998dc2c88e64b", // k8s v1.14.7 in us-west-2
-    instanceType: "t3.2xlarge",
-    desiredCapacity: 5,
-    minSize: 5,
+    //amiId: "ami-0ca5998dc2c88e64b", // k8s v1.14.7 in us-west-2
+    instanceType: "t3.medium",
+    desiredCapacity: 3,
+    minSize: 3,
     maxSize: 10,
-    labels: {"amiId": "ami-0ca5998dc2c88e64b"},
-    taints: { "special": { value: "true", effect: "NoSchedule"}},
+    labels: { "amiId": "ami-0ca5998dc2c88e64b" },
+    taints: { "special": { value: "true", effect: "NoSchedule" } },
     cloudFormationTags: clusterName.apply(clusterName => ({
         "CloudFormationGroupTag": "true",
         "k8s.io/cluster-autoscaler/enabled": "true",
         [`k8s.io/cluster-autoscaler/${clusterName}`]: "true",
     })),
 }, {
-    providers: { kubernetes: cluster.provider},
+    providers: { kubernetes: cluster.provider },
 });
 
 // Create Kubernetes namespaces.
@@ -116,11 +116,11 @@ export const appSvcsNamespaceName = appSvcsNamespace.metadata.name;
 const appsNamespace = new k8s.core.v1.Namespace("apps", undefined, { provider: cluster.provider });
 export const appsNamespaceName = appsNamespace.metadata.name;
 
-const nginxNs = new k8s.core.v1.Namespace("ingress-nginx", {metadata: {name: "ingress-nginx"}}, { provider: cluster.provider});
+const nginxNs = new k8s.core.v1.Namespace("ingress-nginx", { metadata: { name: "ingress-nginx" } }, { provider: cluster.provider });
 
 // Create a resource quota in the apps namespace.
 const quotaAppNamespace = new k8s.core.v1.ResourceQuota("apps", {
-    metadata: {namespace: appsNamespaceName},
+    metadata: { namespace: appsNamespaceName },
     spec: {
         hard: {
             cpu: "20",
@@ -131,7 +131,7 @@ const quotaAppNamespace = new k8s.core.v1.ResourceQuota("apps", {
             services: "5",
         },
     }
-},{
+}, {
     provider: cluster.provider
 });
 
@@ -188,7 +188,7 @@ if (cluster.core.storageClasses) {
                         spec: {
                             accessModes: ["ReadWriteOnce"],
                             storageClassName: name,
-                            resources: {requests: {storage: "1Gi"}}
+                            resources: { requests: { storage: "1Gi" } }
                         }
                     },
                         { provider: cluster.provider }
