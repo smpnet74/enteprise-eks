@@ -43,7 +43,7 @@ const cluster = new eks.Cluster(`${projectName}`, {
     nodeAssociatePublicIpAddress: false,
     skipDefaultNodeGroup: true,
     deployDashboard: false,
-    version: "1.16",
+    version: "1.15",
     tags: {
         "Project": "k8s-aws-cluster",
         "Org": "pulumi",
@@ -56,7 +56,7 @@ const cluster = new eks.Cluster(`${projectName}`, {
 });
 
 // Export the cluster details.
-export const kubeconfig = cluster.kubeconfig.apply(JSON.stringify);
+export const kubeconfig = cluster.kubeconfig//.apply(JSON.stringify);
 export const clusterName = cluster.core.cluster.name;
 export const region = aws.config.region;
 export const securityGroupIds = [cluster.nodeSecurityGroup.id];
