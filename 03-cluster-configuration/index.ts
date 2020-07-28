@@ -73,7 +73,6 @@ const ngStandard = new eks.NodeGroup(`${projectName}-ng-standard`, {
     desiredCapacity: 3,
     minSize: 3,
     maxSize: 10,
-    spotPrice: ".017",
     labels: { "amiId": "ami-0ca5998dc2c88e64b" },
     cloudFormationTags: clusterName.apply(clusterName => ({
         "CloudFormationGroupTag": "true",
