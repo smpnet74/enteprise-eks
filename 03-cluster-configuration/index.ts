@@ -73,6 +73,7 @@ const ngStandard = new eks.NodeGroup(`${projectName}-ng-standard`, {
     desiredCapacity: 3,
     minSize: 3,
     maxSize: 10,
+    spotPrice: ".017",
     labels: { "amiId": "ami-0ca5998dc2c88e64b" },
     cloudFormationTags: clusterName.apply(clusterName => ({
         "CloudFormationGroupTag": "true",
@@ -84,9 +85,9 @@ const ngStandard = new eks.NodeGroup(`${projectName}-ng-standard`, {
 });
 
 // Create a 2xlarge node group of t3.2xlarge workers with taints for special workloads.
-const ng2xlarge = new eks.NodeGroup(`${projectName}-ng-2xlarge`, {
+const ngt3medium = new eks.NodeGroup(`${projectName}-ng-t3medium`, {
     cluster: cluster,
-    instanceProfile: new aws.iam.InstanceProfile("ng-2xlarge", { role: perfNodegroupIamRoleName }),
+    instanceProfile: new aws.iam.InstanceProfile("ng-t3medium", { role: perfNodegroupIamRoleName }),
     nodeAssociatePublicIpAddress: false,
     nodeSecurityGroup: cluster.nodeSecurityGroup,
     clusterIngressRule: cluster.eksClusterIngressRule,
@@ -95,6 +96,7 @@ const ng2xlarge = new eks.NodeGroup(`${projectName}-ng-2xlarge`, {
     desiredCapacity: 3,
     minSize: 3,
     maxSize: 10,
+    spotPrice: ".017",
     labels: { "amiId": "ami-0ca5998dc2c88e64b" },
     taints: { "special": { value: "true", effect: "NoSchedule" } },
     cloudFormationTags: clusterName.apply(clusterName => ({
